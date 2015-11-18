@@ -1,0 +1,136 @@
+ <!DOCTYPE html>
+  <html lang="en">
+      <head> 
+              <title>Hello Backbone.js!</title>
+              <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+              <script src="https://code.jquery.com/jquery-2.1.1.min.js"> </script>
+              <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
+
+              <style>
+ul#photos {
+width: 350px;
+list-style: none;
+}
+
+ul#photos li {
+float: left;
+margin: 5px;
+}
+
+ul#photos img{
+border: 5px solid orange;
+width: 75px;
+height: 75px
+}
+              </style>   
+      </head>
+          <body>
+               <h1>Backbone.js Flickr Gallery</h1>
+
+               <ul id="photos">
+
+                   <script type="text/template" id="item"> 
+
+                     <li><a href="<%= link %>"><img src="<%= media.m %>" /></a></li>
+
+                   </script>
+               </ul>  
+               </script>
+        </form>
+
+<script>
+
+var Item = Backbone.Model.extend({
+
+           initialize: function() {
+
+                console.log('Flickr is the answer')
+           } 
+})
+
+var ItemsCollection = Backbone.Collection.extend({
+    model: Item
+})
+
+var ItemView = Backbone.View.extend({
+
+    className: "list_item",
+
+    tmpl: "#item",
+
+    render: function() {
+
+            var tmpl = _.template($(this.tmpl).html());
+
+            this.$el.html(tmpl(this.model.toJSON()));
+
+            return this;
+    } 
+})
+
+var ItemsView = Backbone.View.extend({
+
+    initialize: function() {
+ 
+    },
+
+    className: '',
+
+    render: function() {
+
+            this.collection.each( function( item ){
+
+                 var itemView = new ItemView({model: item})   
+
+                 this.$el.append(itemView.render().el)
+
+            }, this)  
+
+            return this
+    } 
+})
+
+
+var controller = {
+
+    fetch: function(params, callback){        
+
+	// add base params
+	params.api_key = 'f7419c7c353a4812a53523af90e255df';
+
+	params.format = 'json';
+	
+	$.ajax({
+
+	    url: 'http://api.flickr.com/services/feeds/photos_public.gne?id=23455178@N06',
+
+	    type: 'GET',
+
+	    dataType: 'jsonp',
+
+	    data: params,
+
+	    jsonp: 'jsoncallback',
+
+	    success: function(data){
+
+                   var myCollection = new ItemsCollection(data.items) 
+
+                   var itemsView = new ItemsView({collection: myCollection})
+
+                   $("#photos").append(itemsView.render().el);  
+	    },	    
+	    error: function() {
+
+		callback();		
+	    }
+	});
+    }
+};
+
+controller.fetch({})
+
+</script>
+
+          </body>
+  </html>
